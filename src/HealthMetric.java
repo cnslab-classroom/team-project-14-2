@@ -1,6 +1,7 @@
 import java.sql.*;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Scanner;
 
 public class HealthMetric {
     private Connection connection;
@@ -35,15 +36,12 @@ public class HealthMetric {
     }
 
     // BMI 계산
-    public double calculateBMI(User user) {
-        double weight = user.getWeight();
-        double height = user.getHeight();
+    public double calculateBMI(double weight, double height) {
         return weight / (height * height);
     }
 
     // 체지방률 계산
-    public double calculateBodyFatPercentage(double bmi, User user, String gender) {
-        int age = user.getAge();
+    public double calculateBodyFatPercentage(double bmi, int age, String gender) {
         if (gender.equalsIgnoreCase("male")) {
             return (1.20 * bmi) + (0.23 * age) - 16.2;
         } else {
@@ -99,6 +97,38 @@ public class HealthMetric {
         }
     }
 
+    // 건강 지표 분석
+    public void analyzeHealthMetrics(double bmi, double bodyFatPercentage, double sleepHours) {
+        System.out.println("\n===== 건강 지표 분석 =====");
+
+        // BMI 분석
+        if (bmi < 18.5) {
+            System.out.println("- 저체중 (BMI: " + bmi + ")");
+        } else if (bmi < 25) {
+            System.out.println("- 정상 체중 (BMI: " + bmi + ")");
+        } else {
+            System.out.println("- 과체중 또는 비만 (BMI: " + bmi + ")");
+        }
+
+        // 체지방률 분석
+        if (bodyFatPercentage < 10) {
+            System.out.println("- 체지방률 낮음 (" + bodyFatPercentage + "%)");
+        } else if (bodyFatPercentage <= 20) {
+            System.out.println("- 체지방률 정상 (" + bodyFatPercentage + "%)");
+        } else {
+            System.out.println("- 체지방률 높음 (" + bodyFatPercentage + "%)");
+        }
+
+        // 수면 시간 분석
+        if (sleepHours < 7) {
+            System.out.println("- 수면 부족 (" + sleepHours + "시간)");
+        } else if (sleepHours > 9) {
+            System.out.println("- 수면 과다 (" + sleepHours + "시간)");
+        } else {
+            System.out.println("- 적정 수면 시간 (" + sleepHours + "시간)");
+        }
+    }
+
     // 데이터베이스 연결 종료
     public void closeConnection() {
         try {
@@ -109,4 +139,69 @@ public class HealthMetric {
             e.printStackTrace();
         }
     }
+
+    // 메인 실행
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        HealthMetric healthMetric = new HealthMetric();
+
+        while (true) {
+            System.out.println("\n===== 건강 데이터 관리 시스템 =====");
+            System.out.println("1. 건강 데이터 추가");
+            System.out.println("2. 저장된 데이터 조회");
+            System.out.println("3. 건강 지표 분석 결과");
+            System.out.println("4. 종료");
+            System.out.print("선택: ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("날짜 (YYYY-MM-DD): ");
+                    String date = scanner.next();
+
+                    System.out.print("키(m): ");
+                    double height = scanner.nextDouble();
+
+                    System.out.print("몸무게(kg): ");
+                    double weight = scanner.nextDouble();
+
+                    System.out.print("나이: ");
+                    int age = scanner.nextInt();
+
+                    System.out.print("성별 (male/female): ");
+                    String gender = scanner.next();
+
+                    System.out.print("취침 시간 (HH:mm): ");
+                    String sleepTime = scanner.next();
+
+                    System.out.print("기상 시간 (HH:mm): ");
+                    String wakeTime = scanner.next();
+
+                    double bmi = healthMetric.calculateBMI(weight, height);
+                    double bodyFat = healthMetric.calculateBodyFatPercentage(bmi, age, gender);
+                    double sleepHours = healthMetric.calculateSleepHours(sleepTime, wakeTime);
+
+                    healthMetric.addRecord(date, bmi, bodyFat, sleepHours);
+                    healthMetric.analyzeHealthMetrics(bmi, bodyFat, sleepHours);
+                    break;
+
+                case 2:
+                    healthMetric.printAllRecords();
+                    break;
+
+                case 3:
+                    System.out.println("건강 데이터 추가 후 분석을 확인하세요.");
+                    break;
+
+                case 4:
+                    healthMetric.closeConnection();
+                    scanner.close();
+                    return;
+
+                default:
+                    System.out.println("잘못된 입력입니다. 다시 선택하세요.");
+            }
+        }
+    }
 }
+
