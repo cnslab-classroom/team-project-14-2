@@ -4,13 +4,16 @@ public class User {
   private int age;
   private double height; // 단위: cm
   private double weight; // 단위: kg
+  private String gender;
 
   // 생성자
-  public User(String name, int age, double height, double weight) {
+  public User(String name, int age, double height, double weight, String gender) {
       this.name = name;
       this.age = age;
       this.height = height;
-      this.weight = weight;
+      this.weight = weight;  //(허은빈) 체지방량 기준 판단하료면 성별 필요해서 성별도 추가했어용 
+      this.gender = gender;   //일요일에 회의하면서 다시 수정해보아요 
+
   }
 
   // getter와 setter
@@ -30,6 +33,7 @@ public class User {
       this.age = age;
   }
 
+
   public double getHeight() {
       return height;
   }
@@ -45,6 +49,16 @@ public class User {
   public void setWeight(double weight) {
       this.weight = weight;
   }
+
+  public String getGender() {
+    return gender;
+}
+
+public void setGender(String gender) {
+    this.gender = gender;
+}
+
+  
 
   // BMI 계산 메서드
   public double calculateBMI() {

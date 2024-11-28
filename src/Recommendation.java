@@ -6,8 +6,8 @@ public class Recommendation {
 
     //외부 객체 클래스 
     private User user;
-    //private HealthMetric healthMetric;
-    //private ActivityLog activityLog;
+    private HealthMetric healthMetric;
+    private ActivityLog activityLog;
 
     //운동한 시간
     private double timeWeek;     
@@ -31,26 +31,54 @@ public class Recommendation {
 
     
     //생성자
-    public Recommendation(User user) {
-        
-        this.user = new User(null, 0, 0, 0, null);
-    //this.healthMetric = new HealthMetric();
-    //this.activityLog = new ActivityLog();
+    public Recommendation(User user, ActivityLog activityLog, HealthMetric healthMetric) {
+        this.user = user;
+        this.activityLog = activityLog;
+        this.healthMetric = healthMetric;
         this.timeWeek = 0;
         this.timeMonth = 0;
         this.calorieWeek = 0;
         this.calorieMonth = 0;
+    
+        // 권장 몸무게 범위 계산
+        this.idealWeightRange = user.calculateIdealWeightRange();
+        this.minWeight = idealWeightRange[0];
+        this.maxWeight = idealWeightRange[1];
     }
-
+    
 
 
 // 하루 기록 업데이트 -> ActivityLog 클래스로부터 받아와야
-public void updateDailyLog(double dailyTime, double dailyCalories) {
-    this.timeWeek += dailyTime;
-    this.timeMonth += dailyTime;
-    this.calorieWeek += dailyCalories;
-    this.calorieMonth += dailyCalories;
+public void updateDailyLog() {
+    LocalDate today = LocalDate.now();
+    double dailyCaloriesBurned = activityLog.getTotalCalories("운동", today);
+    double dailyCaloriesConsumed = activityLog.getTotalCalories("식단", today);
+
+    this.timeWeek += dailyCaloriesBurned / 100; // 예: 100칼로리당 1시간으로 가정
+    this.calorieWeek += dailyCaloriesConsumed;
+    this.timeMonth += dailyCaloriesBurned / 100;
+    this.calorieMonth += dailyCaloriesConsumed;
 }
+public void generateWeeklyReport() {
+    String report = String.format(
+        "%s 주간 리포트:\n- 총 운동 시간: %.2f시간\n- 총 섭취 칼로리: %.2fkcal",
+        LocalDate.now(), timeWeek, calorieWeek
+    );
+    weeklyReports.add(report);
+    resetWeeklyData();
+    System.out.println(report);
+}
+
+public void generateMonthlyReport() {
+    String report = String.format(
+        "%s 월간 리포트:\n- 총 운동 시간: %.2f시간\n- 총 섭취 칼로리: %.2fkcal",
+        LocalDate.now(), timeMonth, calorieMonth
+    );
+    monthlyReports.add(report);
+    resetMonthlyData();
+    System.out.println(report);
+}
+
 
 // 주간 리포트 저장
 private void saveWeeklyReport() {
