@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Recommendation {
 
-    //외부 객체 클래스 
+
     private User user;
     private HealthMetric healthMetric;
     private ActivityLog activityLog;
